@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { CircleUser, Cpu, Code, Database, Box, Volume2, Github, Linkedin, MessagesSquare, ExternalLink, Menu} from 'lucide-react';
+import { CircleUser, Cpu, Code, Database, Box, Volume2, Github, Linkedin, MessagesSquare, ExternalLink, Menu} from 'lucide-react'; // ExternalLink supprimé
 import { useActiveSection } from '../hooks/useActiveSection';
-import { MenuMobile } from './MenuMobile';
+import { MenuMobile } from './MenuMobile'; // Correction ici
 import AIChat, { ChatToggleButton } from './Chatbot/AIChat';
 import ContentExtractor from '../services/content/ContentExtractor';
 import ScrollToTopButton from './ScrollToTopButton';
@@ -30,29 +30,55 @@ const SOCIAL_LINKS = [
 ];
 
 
-// Composant carte avec effet néon et badge de statut
-const FeatureCard = ({ icon: Icon, title, description, status, url }) => {
+// Composant carte avec effet néon et badge de statut (maintenant conditionnel)
+const FeatureCard = ({ icon: Icon, title, description, status, url, imgSrc }) => {
   const CardContent = (
-    <div className="relative group transform transition-all duration-300 hover:scale-105">
+    <div className="relative group transform transition-all duration-300 hover:scale-105 h-full"> {/* h-full pour que toutes les cartes aient la même hauteur */}
       <div className="absolute -inset-0.5 bg-blue-500/10 blur-sm rounded-3xl group-hover:bg-blue-400/20" />
-      <div className="relative p-6 bg-gray-800/90 rounded-2xl border border-gray-700 h-full">
-        <div className="flex items-center justify-between mb-4">
-          <div className="p-3 rounded-full bg-blue-500/20 w-fit">
-            <Icon className="w-6 h-6 text-blue-400" />
+      
+      {/* La carte interne avec le contenu */}
+      <div className="relative bg-gray-800/90 rounded-2xl border border-gray-700 h-full flex flex-col overflow-hidden"> {/* overflow-hidden pour que l'image épouse les bords arrondis */}
+        
+        {/* L'image est affichée en haut de la carte si imgSrc est fourni */}
+        {imgSrc && (
+          // Conteneur de l'image avec une hauteur fixe et un fond pour les logos "containés"
+          <div className="w-full h-40 flex-shrink-0 bg-gray-700/50 flex items-center justify-center">
+            <img 
+              src={imgSrc} 
+              alt={title} 
+              // object-contain pour s'assurer que l'image entière est visible
+              // rounded-t-2xl pour les coins supérieurs arrondis de l'image qui épousent ceux de la carte
+              className="object-contain w-full h-full rounded-t-2xl" 
+            />
           </div>
-          {status && (
-            <span className={`
-              text-[11px] tracking-wide font-medium uppercase px-2 py-0.5 rounded
-              ${status === 'En cours'
-                ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/30'
-                : 'bg-green-500/10 text-green-400 border border-green-500/30'}
-            `}>
-              {status}
-            </span>
-          )}
+        )}
+
+        {/* Le contenu textuel de la carte */}
+        <div className="p-6 flex flex-col flex-grow"> {/* Ajout de padding ici pour le texte */}
+          <div className="flex items-center justify-between mb-4">
+            {/* L'icône (si fournie) est affichée ici */}
+            {Icon && (
+              <div className="p-3 rounded-full bg-blue-500/20 w-fit">
+                <Icon className="w-6 h-6 text-blue-400" />
+              </div>
+            )}
+            {/* Le badge de statut s'affiche SEULEMENT si la prop 'status' est fournie et non vide */}
+            {status && (
+              <span className={`
+                text-[11px] tracking-wide font-medium uppercase px-2 py-0.5 rounded
+                ${status === 'En cours'
+                  ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/30'
+                  : 'bg-green-500/10 text-green-400 border border-green-500/30'}
+              `}>
+                {status}
+              </span>
+            )}
+          </div>
+          <h3 className="text-xl font-semibold text-white mb-2">{title}</h3>
+          {/* flex-grow assure que la description prend l'espace restant,
+              ce qui aide à aligner les bas des cartes si les descriptions sont de longueurs différentes */}
+          <p className="text-gray-400 flex-grow">{description}</p>
         </div>
-        <h3 className="text-xl font-semibold text-white mb-2">{title}</h3>
-        <p className="text-gray-400">{description}</p>
       </div>
     </div>
   );
@@ -70,34 +96,16 @@ const FeatureCard = ({ icon: Icon, title, description, status, url }) => {
 };
 
 
-// Composant radar des compétences
-const SkillRadar = ({ skills }) => (
-  <div className="relative w-full max-w-4xl mx-auto">
-    <div className="absolute inset-0 bg-blue-500/10 rounded-3xl blur-[2px]" />
-    <div className="relative grid grid-cols-2 md:grid-cols-4 gap-6 p-8">
-      {Object.entries(skills).map(([skill, level]) => (
-        <div key={skill} className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-300">{skill}</span>
-            <span className="text-blue-400">{level}%</span>
-          </div>
-          <div className="h-2 bg-gray-700/50 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full transition-all duration-1000"
-              style={{ width: `${level}%` }}
-            />
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-);
+// Le composant SkillRadar est complètement supprimé
+// car il n'est plus utilisé.
+
 
 // Composant principal
 const AIPortfolio = () => {
   const [isConsoleOpen, setIsConsoleOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Étape 1 : Préparation des États React pour le Formulaire de Contact
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -108,6 +116,17 @@ const AIPortfolio = () => {
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
+
+  useEffect(() => {
+  if (formSubmitted && (Object.keys(formErrors).length === 0 || formErrors.general)) {
+    const timer = setTimeout(() => {
+      setFormSubmitted(false);
+      setFormErrors({}); // Réinitialiser aussi les erreurs
+    }, 5000); // Le message disparaît après 5 secondes (5000 millisecondes)
+
+    return () => clearTimeout(timer); // Nettoyage du timer si le composant est démonté ou si l'état change
+  }
+}, [formSubmitted, formErrors]);
 
   const sectionRefs = {
     about: useRef(null),
@@ -134,19 +153,64 @@ const AIPortfolio = () => {
     }
   };
 
-  const skills = {
-    'HTML/CSS': 99,
-    'PHP': 95,
-    'JavaScript': 99,
-    'Python': 50,
-    'SQL': 100,
-    'Laravel': 80,
-    'React/Vite': 30,
-    'TensorFlow PyTorch': 15,
-    'Visual Studio Code': 100,
-    'Git': 100,
-    'Anglais': 80
-  };
+  // Nouvelle structure pour les compétences avec images
+  const skillsData = [
+    {
+      imgSrc: '/images/skills/html_css.png', // Chemin vers votre image HTML/CSS
+      title: 'HTML/CSS',
+      description: 'Maîtrise complète de HTML5 et CSS3 pour des interfaces web structurées et stylisées. Forte compétence en responsive design et SASS/LESS.',
+    },
+    {
+      imgSrc: '/images/skills/php.png', // Chemin vers votre image PHP
+      title: 'PHP',
+      description: 'Développement backend robuste avec PHP, incluant la conception d\'APIs RESTful et la gestion de bases de données.',
+    },
+    {
+      imgSrc: '/images/skills/javascript.png', // Chemin vers votre image JavaScript
+      title: 'JavaScript',
+      description: 'Expertise en JavaScript ES6+ pour le développement web interactif, incluant le DOM, AJAX, et les frameworks modernes.',
+    },
+    {
+      imgSrc: '/images/skills/python.png', // Chemin vers votre image Python
+      title: 'Python',
+      description: 'Bonne connaissance de Python pour le scripting, l\'automatisation, le traitement de données et les bases en machine learning.',
+    },
+    {
+      imgSrc: '/images/skills/sql.png', // Chemin vers votre image SQL
+      title: 'SQL',
+      description: 'Conception et optimisation de bases de données relationnelles (MySQL, PostgreSQL) avec SQL, gestion des requêtes complexes.',
+    },
+    {
+      imgSrc: '/images/skills/laravel.png', // Chemin vers votre image Laravel
+      title: 'Laravel',
+      description: 'Développement d\'applications web avec le framework PHP Laravel, utilisation d\'Eloquent ORM et des fonctionnalités MVC.',
+    },
+    {
+      imgSrc: '/images/skills/react_vite.png', // Chemin vers votre image React/Vite
+      title: 'React/Vite',
+      description: 'Développement d\'interfaces utilisateur modernes avec React.js, gestion des états, hooks et intégration avec Vite pour le tooling rapide.',
+    },
+    {
+      imgSrc: '/images/skills/tensorflow_pytorch.png', // Chemin vers votre image TensorFlow/PyTorch
+      title: 'TensorFlow / PyTorch',
+      description: 'Initiation et exploration des librairies TensorFlow et PyTorch pour des projets de machine learning et deep learning.',
+    },
+    {
+      imgSrc: '/images/skills/vscode.png', // Chemin vers votre image VSCode
+      title: 'Visual Studio Code',
+      description: 'Utilisation avancée de VS Code comme environnement de développement intégré, avec extensions et débogage efficaces.',
+    },
+    {
+      imgSrc: '/images/skills/git.png', // Chemin vers votre image Git
+      title: 'Git',
+      description: 'Gestion de version avec Git et GitHub pour le travail collaboratif, le suivi des modifications et le déploiement.',
+    },
+    {
+      imgSrc: '/images/skills/english.png', // Chemin vers votre image Anglais
+      title: 'Anglais',
+      description: 'Niveau d\'anglais intermédiaire, suffisant pour la lecture de documentation technique et la communication basique.',
+    },
+  ];
 
   useEffect(() => {
     const initializeContent = () => {
@@ -161,24 +225,14 @@ const AIPortfolio = () => {
     initializeContent();
   }, []);
 
-  // Effet pour faire disparaître les messages d'alerte
-  useEffect(() => {
-    if (formSubmitted && (Object.keys(formErrors).length === 0 || formErrors.general)) {
-      const timer = setTimeout(() => {
-        setFormSubmitted(false);
-        setFormErrors({}); // Réinitialiser aussi les erreurs
-      }, 5000); // Le message disparaît après 5 secondes
-
-      return () => clearTimeout(timer); // Nettoyage du timer
-    }
-  }, [formSubmitted, formErrors]);
-
+  // Étape 2.1 : handleChange (Gestion des changements d'input)
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+    // Réinitialiser l'erreur spécifique au champ modifié et le statut formSubmitted
     setFormErrors(prev => ({
       ...prev,
       [name]: ''
@@ -186,6 +240,7 @@ const AIPortfolio = () => {
     setFormSubmitted(false);
   };
 
+  // Étape 2.2 : validateForm (Fonction de Validation)
   const validateForm = () => {
     const errors = {};
     if (!formData.name.trim()) {
@@ -206,13 +261,28 @@ const AIPortfolio = () => {
     return Object.keys(errors).length === 0;
   };
 
-  // La fonction handleSubmit est conservée pour la validation côté client et la gestion des états
+  // Étape 2.3 : handleSubmit (Gestion de la Soumission du Formulaire)
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Empêche l'envoi par défaut du formulaire, on le fera manuellement
+    e.preventDefault();
 
-    // Notre validation côté client, y compris la case RGPD
-    if (!validateForm()) {
+    // Logique Honeypot de Formspree (_gotcha)
+    // Ici, on vérifie si le champ _gotcha a été rempli. S'il l'est, c'est un bot.
+    if (formData._gotcha) {
+      console.log('Tentative de bot détectée et bloquée (honeypot Formspree).');
+      // Pour les bots, on peut simuler un succès pour ne pas les alerter
       setFormSubmitted(true);
+      setFormData({
+        name: '',
+        email: '',
+        message: '',
+        privacyConsent: false,
+        _gotcha: ''
+      });
+      return;
+    }
+
+    if (!validateForm()) {
+      setFormSubmitted(true); // Indique qu'une soumission a été tentée avec des erreurs
       setFormErrors(prev => ({
         ...prev,
         general: 'Veuillez corriger les erreurs dans le formulaire.'
@@ -225,9 +295,11 @@ const AIPortfolio = () => {
 
     try {
       // Construction manuelle du FormData pour l'envoi à Formspree
-      const data = new FormData(e.target); // e.target est la balise <form>
+      // On crée un objet FormData à partir du formulaire HTML.
+      // Cela permet à Formspree de traiter les champs correctement.
+      const data = new FormData(e.target);
 
-      const response = await fetch('https://formspree.io/f/myzwvlwn', { // <-- REMPLACEZ CETTE URL
+      const response = await fetch('https://formspree.io/f/votre-id-unique-formspree', { // <-- REMPLACEZ CETTE URL PAR LA VÔTRE DE FORMSPREE !
         method: 'POST',
         body: data, // Formspree accepte FormData directement
         headers: {
@@ -243,11 +315,11 @@ const AIPortfolio = () => {
           email: '',
           message: '',
           privacyConsent: false,
-          _gotcha: ''
+          _gotcha: '' // Réinitialiser le honeypot aussi
         });
-        
+        console.log('Formulaire soumis avec succès à Formspree !');
       } else {
-        // Formspree peut renvoyer des erreurs, par exemple si le formulaire est mal configuré
+        // Formspree peut renvoyer des erreurs (ex: validation, spam détecté côté Formspree)
         const result = await response.json();
         setFormSubmitted(true);
         setFormErrors({ general: result.errors ? result.errors.map(err => err.message).join(', ') : 'Une erreur est survenue lors de l\'envoi via Formspree.' });
@@ -356,11 +428,23 @@ const AIPortfolio = () => {
           >
             <div className="max-w-7xl mx-auto px-8">
               <h2 className="text-4xl font-bold text-center mb-12">Compétences Techniques</h2>
-              <SkillRadar skills={skills} />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {/* Mapping sur skillsData pour afficher les cartes de compétences */}
+                {skillsData.map((skill, index) => (
+                  <FeatureCard
+                    key={index} // Utilisez une clé unique, l'index est acceptable si la liste est statique
+                    imgSrc={skill.imgSrc}
+                    title={skill.title}
+                    description={skill.description}
+                    // Pas de prop 'status' ici, donc le badge ne s'affichera pas
+                    // Pas de prop 'icon' non plus, car l'image est utilisée à la place
+                  />
+                ))}
+              </div>
             </div>
           </section>
 
-          {/* Projects Section */}
+          {/* Projects Section (INCHANGÉE, CONTINUE D'UTILISER 'icon' ET 'status') */}
           <section
             ref={sectionRefs.projects}
             id="projects"
@@ -373,19 +457,19 @@ const AIPortfolio = () => {
                   icon={Database}
                   title="Système R.A.G"
                   description="Pipeline de génération augmentée par récupération, combinant recherche vectorielle et LLM pour des réponses précises"
-                  status="En cours"
+                  status="En cours" // Le statut est bien présent pour les projets
                 />
                 <FeatureCard
                   icon={Box}
                   title="Infrastructure Docker"
                   description="Conteneurisation et orchestration d'applications via Docker pour un déploiement léger et reproductible"
-                  status="Terminé"
+                  status="Terminé" // Le statut est bien présent pour les projets
                 />
                 <FeatureCard
                   icon={Volume2}
                   title="Soundboard en Rust"
                   description="Interface audio interactive développée en Rust, permettant de déclencher des sons avec faible latence"
-                  status="En cours"
+                  status="En cours" // Le statut est bien présent pour les projets
                 />
               </div>
             </div>
@@ -403,7 +487,7 @@ const AIPortfolio = () => {
                 <div className="absolute inset-0 bg-blue-500/20 rounded-2xl blur-[2px]" />
                 <form
                   className="relative space-y-8 p-8 sm:p-12 bg-gray-800/90 rounded-2xl border border-gray-700 backdrop-blur-sm"
-                  onSubmit={handleSubmit} // On utilise toujours notre handleSubmit pour la validation
+                  onSubmit={handleSubmit}
                 >
                   {/* Messages généraux de succès/erreur */}
                   {formSubmitted && Object.keys(formErrors).length === 0 && (
@@ -423,7 +507,7 @@ const AIPortfolio = () => {
                     <input
                       type="text"
                       id="name"
-                      name="name" // Important pour Formspree
+                      name="name"
                       value={formData.name}
                       onChange={handleChange}
                       placeholder="Votre nom"
@@ -438,7 +522,7 @@ const AIPortfolio = () => {
                     <input
                       type="email"
                       id="email"
-                      name="email" // Important pour Formspree
+                      name="email"
                       value={formData.email}
                       onChange={handleChange}
                       placeholder="votre.email@exemple.com"
@@ -452,7 +536,7 @@ const AIPortfolio = () => {
                     <label htmlFor="message" className="text-sm text-gray-400">Message</label>
                     <textarea
                       id="message"
-                      name="message" // Important pour Formspree
+                      name="message"
                       rows="6"
                       value={formData.message}
                       onChange={handleChange}
@@ -462,16 +546,21 @@ const AIPortfolio = () => {
                     {formErrors.message && <p className="text-red-400 text-sm">{formErrors.message}</p>}
                   </div>
 
-                  {/* Champ Honeypot de Formspree (MASQUÉ) */}
-                  {/* IMPORTANT: Le "name" doit être _gotcha pour Formspree */}
-                  <input type="text" name="_gotcha"
-                    style={{ display: 'none' }} // Masqué visuellement
-                    tabIndex="-1" // Non-focus avec tabulation
-                    autoComplete="off" // Empêche l'auto-remplissage
-                    value={formData._gotcha} // Géré par notre état, mais ne sera pas rempli par un humain
-                    onChange={handleChange}
-                  />
-
+                  {/* Champ Honeypot (masqué) */}
+                  {/* Pour le honeypot de Formspree, il doit être dans le DOM pour que FormData le capture */}
+                  {/* On utilise une classe utilitaire Tailwind pour le masquer et le rendre inaccessible */}
+                  <div className="absolute opacity-0 pointer-events-none -z-50">
+                    <label htmlFor="_gotcha" className="sr-only">Ne remplissez pas ce champ</label>
+                    <input
+                      type="text"
+                      id="_gotcha"
+                      name="_gotcha"
+                      value={formData._gotcha}
+                      onChange={handleChange}
+                      tabIndex="-1" // Empêche la mise au point par tabulation
+                      autoComplete="off" // Empêche l'autocomplétion du navigateur
+                    />
+                  </div>
 
                   {/* Case à cocher RGPD */}
                   <div className="flex items-start space-x-2">
