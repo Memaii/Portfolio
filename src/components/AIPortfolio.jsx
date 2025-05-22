@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { CircleUser, Cpu, Code, Database, Box, Volume2, Github, Linkedin, MessagesSquare, ExternalLink, Menu} from 'lucide-react'; // ExternalLink supprimé
+import { CircleUser, Cpu, Code, Database, Box, Volume2, Github, Linkedin, MessagesSquare, Menu, X} from 'lucide-react';
 import { useActiveSection } from '../hooks/useActiveSection';
-import { MenuMobile } from './MenuMobile'; // Correction ici
-import AIChat, { ChatToggleButton } from './Chatbot/AIChat';
+import { MenuMobile } from './MenuMobile';
+import AIChat, { ChatToggleButton } from './Chatbot/AIChat'; // Importation correcte de AIChat
 import ContentExtractor from '../services/content/ContentExtractor';
 import ScrollToTopButton from './ScrollToTopButton';
 import BubblesBackground from './BubblesBackground';
@@ -41,13 +41,12 @@ const FeatureCard = ({ icon: Icon, title, description, status, url, imgSrc }) =>
         
         {/* L'image est affichée en haut de la carte si imgSrc est fourni */}
         {imgSrc && (
-          // Conteneur de l'image avec une hauteur fixe et un fond pour les logos "containés"
-          <div className="w-full h-40 flex-shrink-0 bg-gray-700/50 flex items-center justify-center">
+          // Conteneur de l'image avec une hauteur fixe, un fond et un padding vertical
+          // `py-4` ou `py-6` peut être ajusté pour plus ou moins d'espace
+          <div className="w-full h-40 flex-shrink-0 bg-gray-700/50 flex items-center justify-center py-4"> {/* AJUSTEMENT ICI: Ajout de py-4 */}
             <img 
               src={imgSrc} 
               alt={title} 
-              // object-contain pour s'assurer que l'image entière est visible
-              // rounded-t-2xl pour les coins supérieurs arrondis de l'image qui épousent ceux de la carte
               className="object-contain w-full h-full rounded-t-2xl" 
             />
           </div>
@@ -94,10 +93,6 @@ const FeatureCard = ({ icon: Icon, title, description, status, url, imgSrc }) =>
     </a>
   ) : CardContent;
 };
-
-
-// Le composant SkillRadar est complètement supprimé
-// car il n'est plus utilisé.
 
 
 // Composant principal
@@ -299,7 +294,7 @@ const AIPortfolio = () => {
       // Cela permet à Formspree de traiter les champs correctement.
       const data = new FormData(e.target);
 
-      const response = await fetch('https://formspree.io/f/votre-id-unique-formspree', { // <-- REMPLACEZ CETTE URL PAR LA VÔTRE DE FORMSPREE !
+      const response = await fetch('https://formspree.io/f/myzwvlwn', { // <-- REMPLACEZ CETTE URL PAR LA VÔTRE DE FORMSPREE !
         method: 'POST',
         body: data, // Formspree accepte FormData directement
         headers: {
@@ -488,6 +483,7 @@ const AIPortfolio = () => {
                 <form
                   className="relative space-y-8 p-8 sm:p-12 bg-gray-800/90 rounded-2xl border border-gray-700 backdrop-blur-sm"
                   onSubmit={handleSubmit}
+                  method="POST"
                 >
                   {/* Messages généraux de succès/erreur */}
                   {formSubmitted && Object.keys(formErrors).length === 0 && (
@@ -601,11 +597,18 @@ const AIPortfolio = () => {
           onClick={() => setIsConsoleOpen(true)}
           isOpen={isConsoleOpen}
         />
+        {/* Passer la prop onClose directement au composant AIChat */}
         <AIChat
           isOpen={isConsoleOpen}
           onClose={() => setIsConsoleOpen(false)}
           onSendMessage={(message) => {
             // TODO: Implémenter la logique de traitement des messages
+            // Si le chatbot renvoie un événement de scroll, on peut le gérer ici
+            if (message.type === 'scrollToSection' && sectionRefs[message.sectionId]) {
+                scrollToSection(message.sectionId);
+            } else {
+                console.log('Message reçu du chatbot:', message);
+            }
           }}
         />
 

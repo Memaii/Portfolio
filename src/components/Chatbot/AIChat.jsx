@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, MessageCircle } from 'lucide-react';
+import { Send, MessageCircle, X} from 'lucide-react';
 import ChatSuggestions from './ChatSuggestions';
 import ChatHistory from './ChatHistory';
 import ChatbotService from '../../services/chat/ChatbotService';
@@ -122,6 +122,17 @@ const AIChat = ({ isOpen, onClose }) => {
         isOpen ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0 pointer-events-none'
       }`}
     >
+     {/*En-tête du chatbot avec le bouton de fermeture */}
+     <div className="flex justify-between items-center p-4 border-b border-gray-700">
+       <h2 className="text-lg font-semibold text-white">Assistant IA</h2>
+       <button
+         onClick={onClose}
+         className="text-gray-400 hover:text-white transition-colors"
+         aria-label="Fermer le chatbot"
+       >
+         <X className="w-5 h-5" /> {/* Icône de croix */}
+       </button>
+    </div>
       <ChatHistory messages={messages} messagesEndRef={messagesEndRef} />
       <div className="p-4 border-t border-gray-700">
         <form onSubmit={handleSubmit} className="space-y-4">
